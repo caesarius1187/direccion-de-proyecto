@@ -1,0 +1,565 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Cambios de alcance · ¿Seguimos teniendo el mismo proyecto?</title>
+  <style>
+    :root {
+      --ink: #1B3A4B;
+      --ink-2: #243f4f;
+      --green: #2E7D4F;
+      --green-soft: #e8f5ec;
+      --red: #8B1E1E;
+      --red-soft: #f6eaea;
+      --amber: #8A5A12;
+      --amber-soft: #f7f0e4;
+      --paper: #f4f1ea;
+      --white: #fff;
+      --muted: #5c6b73;
+      --line: #d5d0c6;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    html, body {
+      height: 100%;
+      background: #0f2430;
+      color: var(--ink);
+      font-family: "Segoe UI", "Calibri", "Helvetica Neue", Arial, sans-serif;
+    }
+
+    .deck {
+      height: 100%;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .slides {
+      flex: 1;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .slide {
+      display: none;
+      position: absolute;
+      inset: 0;
+      padding: 56px 72px 72px;
+      background: var(--paper);
+      flex-direction: column;
+    }
+
+    .slide.active { display: flex; }
+
+    .slide.dark {
+      background: var(--ink);
+      color: var(--white);
+    }
+
+    .kicker {
+      font-size: 13px;
+      letter-spacing: 0.14em;
+      text-transform: uppercase;
+      color: var(--green);
+      font-weight: 700;
+      margin-bottom: 12px;
+    }
+
+    .slide.dark .kicker { color: #9ccc65; }
+
+    h1 {
+      font-size: 48px;
+      line-height: 1.12;
+      font-weight: 700;
+      max-width: 16ch;
+      letter-spacing: -0.02em;
+    }
+
+    h2 {
+      font-size: 36px;
+      line-height: 1.18;
+      font-weight: 700;
+      letter-spacing: -0.02em;
+      margin-bottom: 28px;
+    }
+
+    .lead {
+      font-size: 22px;
+      line-height: 1.4;
+      max-width: 42ch;
+      color: var(--muted);
+      margin-top: 20px;
+    }
+
+    .slide.dark .lead { color: #c5d4dc; }
+
+    .answer {
+      font-size: 96px;
+      line-height: 0.9;
+      font-weight: 800;
+      letter-spacing: -0.04em;
+      margin: 8px 0 16px;
+    }
+
+    .meta {
+      margin-top: auto;
+      font-size: 15px;
+      color: #9bb0bb;
+    }
+
+    .grid-2 {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 24px;
+      flex: 1;
+    }
+
+    .grid-3 {
+      display: grid;
+      grid-template-columns: 1fr 1fr 1fr;
+      gap: 20px;
+      flex: 1;
+    }
+
+    .card {
+      background: var(--white);
+      border: 1px solid var(--line);
+      border-radius: 6px;
+      padding: 22px 24px;
+    }
+
+    .card h3 {
+      font-size: 18px;
+      margin-bottom: 10px;
+    }
+
+    .card p, .card li {
+      font-size: 16px;
+      line-height: 1.45;
+      color: var(--muted);
+    }
+
+    .card ul { padding-left: 18px; }
+    .card li { margin: 6px 0; }
+
+    .card.ok { border-top: 5px solid var(--green); }
+    .card.warn { border-top: 5px solid var(--amber); }
+    .card.bad { border-top: 5px solid var(--red); }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      background: var(--white);
+      font-size: 16px;
+    }
+
+    th, td {
+      text-align: left;
+      padding: 12px 14px;
+      border-bottom: 1px solid var(--line);
+      vertical-align: top;
+    }
+
+    th {
+      background: var(--ink);
+      color: var(--white);
+      font-weight: 600;
+      font-size: 14px;
+      letter-spacing: 0.02em;
+    }
+
+    td:first-child { font-weight: 700; width: 18%; }
+
+    .reqs {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px 28px;
+      font-size: 20px;
+      line-height: 1.35;
+    }
+
+    .reqs li { list-style: none; padding: 8px 0 8px 28px; position: relative; }
+    .reqs li::before {
+      content: "";
+      width: 10px;
+      height: 10px;
+      background: var(--green);
+      position: absolute;
+      left: 0;
+      top: 16px;
+    }
+
+    .note {
+      margin-top: 22px;
+      padding: 16px 18px;
+      background: var(--white);
+      border-left: 4px solid var(--ink);
+      font-size: 17px;
+      line-height: 1.4;
+    }
+
+    .impact {
+      display: grid;
+      grid-template-columns: 1fr 1fr 1fr;
+      gap: 20px;
+      flex: 1;
+    }
+
+    .impact .num {
+      font-size: 40px;
+      font-weight: 800;
+      letter-spacing: -0.03em;
+      color: var(--ink);
+      margin-bottom: 8px;
+    }
+
+    .quote {
+      font-size: 28px;
+      line-height: 1.35;
+      font-weight: 600;
+      max-width: 28ch;
+    }
+
+    .risks {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 16px;
+      flex: 1;
+    }
+
+    .risk {
+      background: var(--white);
+      padding: 18px 20px;
+      border-left: 5px solid var(--red);
+    }
+
+    .risk strong { display: block; font-size: 18px; margin-bottom: 6px; }
+    .risk span { color: var(--muted); font-size: 15px; line-height: 1.4; }
+
+    .vs {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 24px;
+      flex: 1;
+    }
+
+    .vs .col {
+      padding: 24px;
+      border-radius: 6px;
+    }
+
+    .vs .a { background: var(--green-soft); }
+    .vs .b { background: var(--red-soft); }
+
+    .vs h3 { font-size: 22px; margin-bottom: 8px; }
+    .vs .when { font-size: 15px; font-weight: 700; margin-bottom: 14px; }
+    .vs .a .when { color: var(--green); }
+    .vs .b .when { color: var(--red); }
+    .vs p { font-size: 18px; line-height: 1.4; }
+
+    .lost {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      flex: 1;
+    }
+
+    .lost div {
+      background: var(--white);
+      padding: 14px 18px;
+      font-size: 18px;
+      line-height: 1.35;
+      border-left: 4px solid var(--ink);
+    }
+
+    .lost div b { color: var(--red); margin-right: 6px; }
+
+    .ask {
+      font-size: 22px;
+      line-height: 1.45;
+      max-width: 40ch;
+      margin-bottom: 28px;
+    }
+
+    .ask-list { font-size: 20px; line-height: 1.7; padding-left: 22px; }
+
+    .bar {
+      height: 48px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 20px;
+      background: #0b1c24;
+      color: #9bb0bb;
+      font-size: 13px;
+    }
+
+    .bar button {
+      background: transparent;
+      color: #c5d4dc;
+      border: 1px solid #3a5563;
+      padding: 6px 12px;
+      cursor: pointer;
+      font: inherit;
+      margin-left: 6px;
+    }
+
+    .bar button:hover { background: #1B3A4B; color: #fff; }
+
+    .progress {
+      position: absolute;
+      left: 0;
+      right: 0;
+      bottom: 48px;
+      height: 3px;
+      background: #d5d0c6;
+      z-index: 2;
+    }
+
+    .progress span {
+      display: block;
+      height: 100%;
+      background: var(--green);
+      width: 0;
+    }
+
+    @media print {
+      .bar, .progress { display: none; }
+      .slide {
+        display: flex !important;
+        position: relative;
+        page-break-after: always;
+        height: 100vh;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="deck">
+    <div class="slides" id="slides">
+
+      <section class="slide dark active">
+        <div class="kicker">Unidad 3 · Alcance, tiempo y recursos · Parte 2</div>
+        <h1>Si aprobamos estos cambios… ¿seguimos teniendo el mismo proyecto?</h1>
+        <p class="lead">Presentación ejecutiva al Directorio. Canal de ventas online · artículos deportivos.</p>
+        <p class="meta">Diez minutos · decisión de alcance antes de Navidad</p>
+      </section>
+
+      <section class="slide">
+        <div class="kicker">Respuesta al Director General</div>
+        <p class="answer">No.</p>
+        <h2 style="margin-bottom:12px">Deja de ser el canal web de seis meses.</h2>
+        <p class="lead" style="margin-top:0">Aparece un programa de transformación digital: otros productos, otros usuarios, otra fecha. Cambiar objetivo, alcance y plazo a la vez no es un ajuste. Es otro encargo.</p>
+      </section>
+
+      <section class="slide">
+        <div class="kicker">Línea base vs. paquete completo</div>
+        <h2>El proyecto no se define por el nombre</h2>
+        <table>
+          <thead>
+            <tr><th></th><th>Aprobado hoy</th><th>Si entra todo</th></tr>
+          </thead>
+          <tbody>
+            <tr><td>Objetivo</td><td>Vender online en todo el país antes de Navidad</td><td>Plataforma digital amplia</td></tr>
+            <tr><td>Producto</td><td>Sitio transaccional (6 requerimientos)</td><td>Sitio + app + portal + lealtad + IA + facturación</td></tr>
+            <tr><td>Usuarios</td><td>Cliente y operador interno</td><td>+ proveedores, app, AFIP, IA</td></tr>
+            <tr><td>Plazo</td><td>26 semanas, holgura 0</td><td>~40 semanas. Navidad perdida</td></tr>
+            <tr><td>Éxito</td><td>Go-live que cobre en la campaña</td><td>«Tener todo». El hito comercial desaparece</td></tr>
+          </tbody>
+        </table>
+      </section>
+
+      <section class="slide">
+        <div class="kicker">Qué pidieron las áreas</div>
+        <h2>Ocho requerimientos, dos precisiones</h2>
+        <ul class="reqs">
+          <li>Programa de fidelización</li>
+          <li>Integración con Mercado Pago</li>
+          <li>Integración con WhatsApp</li>
+          <li>App móvil</li>
+          <li>Portal para proveedores</li>
+          <li>Recomendaciones con IA</li>
+          <li>Facturación electrónica</li>
+          <li>Programa de puntos</li>
+        </ul>
+        <div class="note">
+          <strong>Fidelización y puntos son el mismo producto.</strong>
+          Mercado Pago no es alcance extra: puede ser la pasarela de tarjeta ya aprobada, no un segundo cobro.
+        </div>
+      </section>
+
+      <section class="slide">
+        <div class="kicker">El filtro</div>
+        <p class="quote">¿Este cambio aumenta la probabilidad de vender online en todo el país en la campaña navideña, sin romper las 26 semanas?</p>
+        <p class="lead">Lo que no ayuda a ese hito puede ser valioso después. Meterlo ahora desvía el camino crítico y pone en riesgo el retorno que el Directorio ya esperaba de diciembre.</p>
+      </section>
+
+      <section class="slide">
+        <div class="kicker">Priorización</div>
+        <h2>Qué entra, qué espera, qué es otro proyecto</h2>
+        <div class="grid-3">
+          <article class="card ok">
+            <h3>Fase 1 — este proyecto</h3>
+            <ul>
+              <li>Mercado Pago como pasarela</li>
+              <li>WhatsApp liviano (botón y avisos)</li>
+            </ul>
+            <p style="margin-top:12px">Alineados con Navidad. Habilitan cobrar y atender.</p>
+          </article>
+          <article class="card warn">
+            <h3>Fase 2 — después de la campaña</h3>
+            <ul>
+              <li>Facturación electrónica integrada</li>
+              <li>Fidelización / puntos</li>
+            </ul>
+            <p style="margin-top:12px">Útiles para operar y retener. No para el primer pico.</p>
+          </article>
+          <article class="card bad">
+            <h3>No mezclar</h3>
+            <ul>
+              <li>App móvil</li>
+              <li>Portal de proveedores</li>
+              <li>Recomendaciones con IA</li>
+            </ul>
+            <p style="margin-top:12px">Otros usuarios, u otros datos. Se desvían del objetivo.</p>
+          </article>
+        </div>
+      </section>
+
+      <section class="slide">
+        <div class="kicker">Planificación</div>
+        <h2>Impacto sobre EDT y recursos</h2>
+        <div class="impact">
+          <div class="card">
+            <div class="num">EDT</div>
+            <p>Cinco entregables aprobados. El paquete no entra como tareas sueltas: ensancha esas ramas y agrega app y portal. Ya no es la misma WBS.</p>
+          </div>
+          <div class="card">
+            <div class="num">Equipo</div>
+            <p>Dimensionado justo para el flujo de compra. MP y WhatsApp liviano entran. El resto pide perfiles que no están. El PM a tiempo parcial no cubre varios frentes.</p>
+          </div>
+          <div class="card">
+            <div class="num">26 → ~40</div>
+            <p>Semanas. Navidad queda en el medio del desarrollo, no después del go-live. Holgura de la línea base: cero.</p>
+          </div>
+        </div>
+      </section>
+
+      <section class="slide">
+        <div class="kicker">Riesgos</div>
+        <h2>No es un riesgo nuevo: se activa el que ya estaba</h2>
+        <div class="risks">
+          <div class="risk">
+            <strong>Pérdida del hito navideño</strong>
+            <span>Canal apagado o inestable en el pico anual de retail.</span>
+          </div>
+          <div class="risk">
+            <strong>Costo de oportunidad comercial</strong>
+            <span>Se dejan de cobrar ventas de noviembre–diciembre que el alcance original sí podría captar.</span>
+          </div>
+          <div class="risk">
+            <strong>Gold plating</strong>
+            <span>App, IA y puntos el día 1: capacidad sin clientes, sin ticket en la ventana que importa.</span>
+          </div>
+          <div class="risk">
+            <strong>Calidad del cobro</strong>
+            <span>Un checkout recargado y mal probado no cobra. Peor que un sitio simple que sí cobra.</span>
+          </div>
+        </div>
+      </section>
+
+      <section class="slide dark">
+        <div class="kicker">Lo que está en juego</div>
+        <h2 style="max-width:18ch">Los cambios amenazan el ingreso que el cronograma estaba diseñado para capturar.</h2>
+        <p class="lead">El pico navideño no se recupera en enero. El cliente ya compró: en la sucursal o en el competidor.</p>
+      </section>
+
+      <section class="slide">
+        <div class="kicker">Dos escenarios</div>
+        <h2>Llegar a tiempo vs. llegar con más features</h2>
+        <div class="vs">
+          <div class="col a">
+            <h3>A · Se protege el proyecto</h3>
+            <p class="when">Go-live semana 26</p>
+            <p>Alcance mínimo + Mercado Pago + WhatsApp liviano. En noviembre–diciembre el canal cobra. Cada pedido es ingreso que hoy no existe. Eso paga el proyecto y justifica las fases siguientes.</p>
+          </div>
+          <div class="col b">
+            <h3>B · Se aprueba el paquete</h3>
+            <p class="when">Go-live ~semana 40</p>
+            <p>En Navidad no hay canal, o hay un sitio a medias. Puntos, IA, app y portal no facturan: no hay base de clientes. La inversión del semestre se consume en construcción, no en venta.</p>
+          </div>
+        </div>
+      </section>
+
+      <section class="slide">
+        <div class="kicker">Ganancias en riesgo</div>
+        <h2>Aprobar el paquete es aceptar esto</h2>
+        <div class="lost">
+          <div><b>1.</b> Dejar de ganar lo que el canal original sí podría generar en el pico. Irreversible en el ejercicio.</div>
+          <div><b>2.</b> Seguir limitados a sucursales en el momento de mayor demanda.</div>
+          <div><b>3.</b> Ceder la ventana a los nuevos actores del mercado.</div>
+          <div><b>4.</b> Construir lealtad, IA y app sin tráfico: invertir en el vacío y rehacer después.</div>
+          <div><b>5.</b> Un go-live tardío y recargado puede vender menos que uno a tiempo y simple.</div>
+        </div>
+      </section>
+
+      <section class="slide">
+        <div class="kicker">Pedido al Directorio</div>
+        <h2>No firmar el paquete como un único cambio</h2>
+        <p class="ask">No se pide rechazar la ambición digital. Se pide no mezclarla con el hito de diciembre.</p>
+        <ol class="ask-list">
+          <li>Congelar la línea base + Mercado Pago + WhatsApp liviano.</li>
+          <li>Diferir facturación integrada y fidelización a después de la campaña.</li>
+          <li>Tratar app, portal e IA como proyectos aparte.</li>
+        </ol>
+      </section>
+
+      <section class="slide dark">
+        <div class="kicker">Cierre</div>
+        <h1>Canal que cobre en Navidad, o programa que cobre después.</h1>
+        <p class="lead">No las dos cosas con el mismo equipo, el mismo plazo y el mismo proyecto.</p>
+        <p class="meta">Recomendación: no cambiar de proyecto a mitad de camino.</p>
+      </section>
+
+    </div>
+    <div class="progress"><span id="bar"></span></div>
+    <div class="bar">
+      <span>← → o clic · F pantalla completa</span>
+      <span>
+        <span id="counter">1 / 1</span>
+        <button type="button" id="prev">Anterior</button>
+        <button type="button" id="next">Siguiente</button>
+      </span>
+    </div>
+  </div>
+  <script>
+    const slides = [...document.querySelectorAll(".slide")];
+    const bar = document.getElementById("bar");
+    const counter = document.getElementById("counter");
+    let i = 0;
+
+    function show(n) {
+      i = Math.max(0, Math.min(n, slides.length - 1));
+      slides.forEach((s, k) => s.classList.toggle("active", k === i));
+      bar.style.width = ((i + 1) / slides.length) * 100 + "%";
+      counter.textContent = i + 1 + " / " + slides.length;
+    }
+
+    document.getElementById("prev").onclick = () => show(i - 1);
+    document.getElementById("next").onclick = () => show(i + 1);
+    document.querySelector(".slides").addEventListener("click", (e) => {
+      if (e.target.closest("button")) return;
+      show(e.clientX > innerWidth / 2 ? i + 1 : i - 1);
+    });
+    addEventListener("keydown", (e) => {
+      if (["ArrowRight", "PageDown", " "].includes(e.key)) { e.preventDefault(); show(i + 1); }
+      if (["ArrowLeft", "PageUp"].includes(e.key)) { e.preventDefault(); show(i - 1); }
+      if (e.key === "Home") show(0);
+      if (e.key === "End") show(slides.length - 1);
+      if (e.key === "f" || e.key === "F") document.documentElement.requestFullscreen?.();
+    });
+    show(0);
+  </script>
+</body>
+</html>
